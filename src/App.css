@@ -77,3 +77,22 @@ h2 {
   background-color: rgb(106, 175, 198);
   cursor: pointer;
 }
+
+.edit-buttons {
+  display: flex;
+  justify-content: space-evenly;
+  gap: 5px;
+}
+
+.edit-buttons button {
+  flex: 1;
+}
+
+.edit-buttons button:last-of-type {
+  background-color: rgb(216, 78, 78);
+  color: #fff;
+}
+
+.edit-buttons button:last-of-type:hover {
+  background-color:rgb(214, 97, 97);
+}
