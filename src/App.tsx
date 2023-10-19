@@ -14,8 +14,8 @@ const App = () => {
   const [content, setContent] = useState('');
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
-  const axiosInstance = axios.create({
-    baseURL: 'https://notes-sever.onrender.com/api/notes',
+  const api = axios.create({
+    baseURL: 'https://notes-sever.onrender.com/api',
     headers: {
       'Content-Type': 'application/json',
     },
@@ -24,7 +24,7 @@ const App = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await axiosInstance.get('');
+        const response = await api.get('');
         setNotes(response.data);
       } catch (error) {
       }
@@ -42,7 +42,7 @@ const App = () => {
     e.preventDefault();
 
     try {
-      const response = await axiosInstance.post('', {
+      const response = await api.post('', {
         title,
         content,
       });
@@ -63,7 +63,7 @@ const App = () => {
     }
 
     try {
-      const response = await axiosInstance.put(`/${selectedNote.id}`, {
+      const response = await api.put(`/${selectedNote.id}`, {
         title,
         content,
       });
@@ -93,7 +93,7 @@ const App = () => {
     e.stopPropagation();
 
     try {
-      await axiosInstance.delete(`/${noteId}`);
+      await api.delete(`/${noteId}`);
       const updateNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updateNotes);
     } catch (error) {
