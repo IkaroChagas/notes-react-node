@@ -18,13 +18,13 @@ const App = () => {
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/notes")
+        const response = await fetch("https://notes-sever.onrender.com/api/notes")
 
         const notes: Note[] = await response.json();
 
         setNotes(notes)
       } catch (error) {
-        console.log(error);
+        
       }
     };
     fetchNotes();
@@ -40,7 +40,7 @@ const App = () => {
     e.preventDefault();
 
     try {
-    const response = await fetch("http://localhost:5000/api/notes",
+    const response = await fetch("https://notes-sever.onrender.com/api/notes",
     {
       method: "POST",
       headers: {
@@ -72,7 +72,7 @@ const App = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:5000/api/notes/${selectedNote.id}`,
+        `https://notes-sever.onrender.com/notes/${selectedNote.id}`,
       {
         method: "PUT",
         headers: {
@@ -110,7 +110,7 @@ const App = () => {
 
       try {
         await fetch(
-          `http://localhost:5000/api/notes/${noteId}`,{
+          `https://notes-sever.onrender.com/api/notes/${noteId}`,{
             
           method: "DELETE",
 
