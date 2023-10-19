@@ -1,5 +1,6 @@
 import './App.css';
 import { useEffect, useState } from 'react';
+import axios from 'axios';
 
 interface Note {
   id: number;
@@ -8,56 +9,47 @@ interface Note {
 }
 
 const App = () => {
-
   const [notes, setNotes] = useState<Note[]>([]);
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
-  const [selectedNote, setSelectedNote] = useState<Note | null >(null);
+  const axiosInstance = axios.create({
+    baseURL: 'https://notes-sever.onrender.com/api/notes',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
 
   useEffect(() => {
     const fetchNotes = async () => {
       try {
-        const response = await fetch("https://notes-sever.onrender.com/api/notes")
-
-        const notes: Note[] = await response.json();
-
-        setNotes(notes)
+        const response = await axiosInstance.get('');
+        setNotes(response.data);
       } catch (error) {
-        
       }
     };
     fetchNotes();
-  }, [])
+  }, []);
 
   const handleNoteClick = (note: Note) => {
     setSelectedNote(note);
     setTitle(note.title);
     setContent(note.content);
-  }
+  };
 
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
 
     try {
-    const response = await fetch("https://notes-sever.onrender.com/api/notes",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
+      const response = await axiosInstance.post('', {
         title,
         content,
-      }),
-    }
-    );
-
-    const newNote = await response.json();
-
-    setNotes([newNote, ...notes]);
-    setTitle("");
-    setContent("");
+      });
+      const newNote = response.data;
+      setNotes([newNote, ...notes]);
+      setTitle('');
+      setContent('');
     } catch (error) {
     
     }
@@ -66,109 +58,94 @@ const App = () => {
   const handleUpdateNote = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if(!selectedNote) {
-      return 
+    if (!selectedNote) {
+      return;
     }
 
     try {
-      const response = await fetch(
-        `https://notes-sever.onrender.com/notes/${selectedNote.id}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          content,
-        })
+      const response = await axiosInstance.put(`/${selectedNote.id}`, {
+        title,
+        content,
       });
 
-      const updateNote = await response.json();
+      const updateNote = response.data;
 
-      const updateNotesList = notes.map((note) => 
-      note.id === selectedNote.id ? updateNote : note);
-  
-      setNotes(updateNotesList)
-      setTitle("")
-      setContent("");
+      const updateNotesList = notes.map((note) =>
+        note.id === selectedNote.id ? updateNote : note
+      );
+
+      setNotes(updateNotesList);
+      setTitle('');
+      setContent('');
       setSelectedNote(null);
-
     } catch (error) {
-
+     
     }
   };
 
   const handleCancel = () => {
-    setTitle("")
-    setContent("");
+    setTitle('');
+    setContent('');
     setSelectedNote(null);
   };
 
   const deleteNote = async (e: React.MouseEvent, noteId: number) => {
-      e.stopPropagation();
+    e.stopPropagation();
 
-      try {
-        await fetch(
-          `https://notes-sever.onrender.com/api/notes/${noteId}`,{
-            
-          method: "DELETE",
-
-          })
-        const updateNotes = notes.filter(note => note.id !== noteId)
-
+    try {
+      await axiosInstance.delete(`/${noteId}`);
+      const updateNotes = notes.filter((note) => note.id !== noteId);
       setNotes(updateNotes);
-      } catch (error) {
+    } catch (error) {
       
-      }
+    }
   };
 
-  return(
-    <div className='app-container'>
-      <form className='note-form' 
-      onSubmit={(e) => selectedNote ? handleUpdateNote(e) : handleAddNote(e)}>
-        
-        <input value={title}
-        onChange={(e) => setTitle(e.target.value)}
-         placeholder='Titulo' 
-         required />
-
-        <textarea 
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
-        placeholder='Conteúdo' 
-        rows={10} 
-        required>
-        </textarea>
-
+  return (
+    <div className="app-container">
+      <form
+        className="note-form"
+        onSubmit={(e) => (selectedNote ? handleUpdateNote(e) : handleAddNote(e))}
+      >
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Titulo"
+          required
+        />
+        <textarea
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder="Conteúdo"
+          rows={10}
+          required
+        ></textarea>
         {selectedNote ? (
-          <div className='edit-buttons'>
-            <button type='submit'>Salvar</button>
+          <div className="edit-buttons">
+            <button type="submit">Salvar</button>
             <button onClick={handleCancel}>Cancelar</button>
           </div>
         ) : (
-          <button type='submit'>Adicionar Nota</button>
+          <button type="submit">Adicionar Nota</button>
         )}
-
       </form>
-
-      <div className='notes-grid'>
+      <div className="notes-grid">
         {notes.map((note) => (
-          <div className='note-item'
-          onClick={() => handleNoteClick(note)}
-          >
-          <div className='notes-header'>
-            <button onClick={(e) => 
-              deleteNote(e, note.id)
-            }>X</button>
+          <div className="note-item" onClick={() => handleNoteClick(note)}>
+            <div className="notes-header">
+              <button
+                onClick={(e) => deleteNote(e, note.id)}
+              >
+                X
+              </button>
+            </div>
+            <h2>{note.title}</h2>
+            <p>{note.content}</p>
           </div>
-          <h2>{note.title}</h2>
-          <p>{note.content}</p>
-        </div>
         ))}
       </div>
     </div>
-  )
+  );
 };
 
-export default App
+export default App;
