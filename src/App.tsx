@@ -15,7 +15,7 @@ const App = () => {
   const [selectedNote, setSelectedNote] = useState<Note | null>(null);
 
   const api = axios.create({
-    baseURL: 'https://notes-sever.onrender.com/',
+    baseURL: 'https://notes-sever.onrender.com/api',
     headers: {
       'Content-Type': 'application/json',
     },
